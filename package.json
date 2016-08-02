@@ -27,6 +27,7 @@
     "url": "git+https://github.com/MattMS/rediscan.git"
   },
   "scripts": {
+    "make": "coffee -c ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.1.0"
