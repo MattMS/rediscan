@@ -1,0 +1,23 @@
+{
+  "author": "Matt McKellar-Spence",
+  "bugs": {
+    "url": "https://github.com/MattMS/rediscan/issues"
+  },
+  "description": "Web interface for local Redis instance.",
+  "homepage": "https://github.com/MattMS/rediscan#readme",
+  "keywords": [
+    "Redis",
+    "web"
+  ],
+  "license": "ISC",
+  "main": "server.js",
+  "name": "rediscan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MattMS/rediscan.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.1.0"
+}
