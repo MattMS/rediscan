@@ -3,7 +3,17 @@
   "bugs": {
     "url": "https://github.com/MattMS/rediscan/issues"
   },
+  "dependencies": {
+    "bunyan": "^1.8.1",
+    "hyperscript": "^1.4.7",
+    "metah": "^0.1.0",
+    "ramda": "^0.21.0",
+    "redis": "^2.6.2"
+  },
   "description": "Web interface for local Redis instance.",
+  "devDependencies": {
+    "coffee-script": "^1.10.0"
+  },
   "homepage": "https://github.com/MattMS/rediscan#readme",
   "keywords": [
     "Redis",
