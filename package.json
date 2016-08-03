@@ -19,8 +19,9 @@
   },
   "homepage": "https://github.com/MattMS/rediscan#readme",
   "keywords": [
+    "HTTP",
     "Redis",
-    "web"
+    "server"
   ],
   "license": "ISC",
   "main": "server.js",
