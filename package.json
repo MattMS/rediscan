@@ -1,5 +1,8 @@
 {
   "author": "Matt McKellar-Spence",
+  "bin": {
+    "rediscan": "./rediscan"
+  },
   "bugs": {
     "url": "https://github.com/MattMS/rediscan/issues"
   },
