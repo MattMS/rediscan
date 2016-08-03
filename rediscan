@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+spawn = require('child_process').spawn
+spawn('node', ['start_server.js'], {stdio: 'inherit'})
