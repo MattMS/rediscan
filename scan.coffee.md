@@ -11,7 +11,7 @@
 
 	R = require 'ramda'
 
-	{always, append, apply, applySpec, curry, curryN, equals, flatten, flip, ifElse, join, juxt, nth, pipe, prepend, prop, T, tap} = R
+	{always, ap, append, apply, applySpec, curry, curryN, equals, flatten, flip, ifElse, join, juxt, nth, pipe, prepend, prop, T, tap} = R
 
 
 ## Relative imports
@@ -133,10 +133,7 @@ state
 Returns the entire HTML text for the Redis SCAN page.
 Suitable for sending to a client or writing to a file.
 
-	# scan_html_maker = pipe(juxt([get_body, make_page]), apply(pipe))
-	scan_html_maker = (h)->
-		pipe(get_body(h), make_page(h))
-		# pipe(juxt([get_body, make_page]), apply(pipe))(h)
+	scan_html_maker = pipe(ap([get_body, make_page]), apply(pipe))
 
 
 ## Exports
