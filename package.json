@@ -11,7 +11,8 @@
     "hyperscript": "^1.4.7",
     "metah": "^0.1.0",
     "ramda": "^0.21.0",
-    "redis": "^2.6.2"
+    "redis": "^2.6.2",
+    "rimraf": "^2.5.4"
   },
   "description": "Web interface for local Redis instance.",
   "devDependencies": {
@@ -31,7 +32,8 @@
     "url": "git+https://github.com/MattMS/rediscan.git"
   },
   "scripts": {
-    "make": "coffee -c ./",
+    "clean": "rimraf *.js",
+    "prepublish": "coffee -c ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.2.0"
