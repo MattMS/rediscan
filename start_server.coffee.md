@@ -2,6 +2,8 @@
 
 ## Core imports
 
+	# fs = require 'fs'
+
 	http = require 'http'
 
 
@@ -10,6 +12,8 @@
 	bunyan = require 'bunyan'
 
 	h = require 'hyperscript'
+
+	{bind} = require 'ramda'
 
 	redis = require 'redis'
 
@@ -24,10 +28,19 @@
 	log = bunyan.createLogger
 		level: 'trace'
 		name: 'start_server'
+		serializers: bunyan.stdSerializers
+		# serializers:
+			# err: bunyan.stdSerializers.err
+			# req: bunyan.stdSerializers.req
+			# res: bunyan.stdSerializers.res
+		# serializers:
+		# 	chunk: pick(['field'])
+		# stream: fs.createWriteStream('server.log.json')
 		# stream: fs.createWriteStream('start_server.log.json')
 
 	# log_error = bind(log.error, log)
 	# log_info = bind(log.info, log)
+	log_trace = bind(log.trace, log)
 
 
 ## Redis client
@@ -40,7 +53,7 @@
 
 ## Run!
 
-	listener = request_handler_maker redis_client
+	listener = request_handler_maker log, redis_client
 
 	server = http.createServer listener
 

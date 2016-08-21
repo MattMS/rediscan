@@ -2,14 +2,10 @@
 
 ## Core imports
 
-	# fs = require 'fs'
-
 	url = require 'url'
 
 
 ## Library imports
-
-	bunyan = require 'bunyan'
 
 	h = require 'hyperscript'
 
@@ -29,32 +25,13 @@
 	send_ok = require('./send_ok')
 
 
-## Logging
-
-	log = bunyan.createLogger
-		level: 'trace'
-		name: 'server'
-		serializers: bunyan.stdSerializers
-		# serializers:
-			# err: bunyan.stdSerializers.err
-			# req: bunyan.stdSerializers.req
-			# res: bunyan.stdSerializers.res
-		# serializers:
-		# 	chunk: pick(['field'])
-		# stream: fs.createWriteStream('server.log.json')
-
-	# log_error = bind(log.error, log)
-	# log_info = bind(log.info, log)
-	log_trace = bind(log.trace, log)
-
-
 ## Redis GET handler
 
 	wrap_code = pipe(flip(append)(['pre']), apply(h))
 
 
-	handle_get_html = curry (redis_client, request, response)->
-		log.trace 'Started /get/ handler.', req: request
+	handle_get_html = curry (log, redis_client, request, response)->
+		log.trace req: request, 'Started /get/ handler.'
 
 		key = pipe(get_url_from_request.path, drop(5))(request)
 
@@ -84,32 +61,31 @@
 
 	handle_scan_html = handle_scan.html(h)
 
-	handle_scan_json = handle_scan.json(h)
+	handle_scan_json = handle_scan.json
 
-	module.exports = (redis_client)->
-		(request, response)->
-			log.trace 'Received request.', req: request
+	module.exports = curry (log, redis_client, request, response)->
+		log.trace req: request, 'Received request.'
 
-			# pipe(get_url_from_request.path, cond([
-			# 	[propEq('pathname', '/'), handle_scan_html(redis_client)],
-			# 	[pipe(prop('pathname'), slice(0, 5), equals('/get/')), handle_get_html(redis_client)],
-			# 	[propEq('pathname', '/scan.json'), handle_scan_json(redis_client)],
-			# 	[T, handle_missing_page]
-			# ]))(request, response)
+		# pipe(get_url_from_request.path, cond([
+		# 	[propEq('pathname', '/'), handle_scan_html(log, redis_client)],
+		# 	[pipe(prop('pathname'), slice(0, 5), equals('/get/')), handle_get_html(log, redis_client)],
+		# 	[propEq('pathname', '/scan.json'), handle_scan_json(log, redis_client)],
+		# 	[T, handle_missing_page]
+		# ]))(request, response)
 
-			url_path = get_url_from_request.path(request)
+		url_path = get_url_from_request.path(request)
 
-			if '/' == url_path
-				handle_scan_html redis_client, request, response
+		if '/' == url_path
+			handle_scan_html log, redis_client, request, response
 
-			# else if '/index.js' == pathname
-			# 	handle_ok_js request, response
+		# else if '/index.js' == pathname
+		# 	handle_ok_js request, response
 
-			else if '/get/' == url_path.slice 0, 5
-				handle_get_html redis_client, request, response
+		else if '/get/' == url_path.slice 0, 5
+			handle_get_html log, redis_client, request, response
 
-			else if '/scan.json' == url_path
-				handle_scan_json redis_client, request, response
+		else if '/scan.json' == url_path
+			handle_scan_json log, redis_client, request, response
 
-			else
-				send_error.text_404 request, response
+		else
+			send_error.text_404 request, response

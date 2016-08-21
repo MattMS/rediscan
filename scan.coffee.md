@@ -7,11 +7,9 @@
 
 ## Library imports
 
-	bunyan = require 'bunyan'
-
 	R = require 'ramda'
 
-	{always, ap, append, apply, applySpec, curry, curryN, equals, flatten, flip, ifElse, join, juxt, nth, pipe, prepend, prop, T, tap} = R
+	{always, ap, append, apply, applySpec, curry, equals, flatten, flip, ifElse, join, juxt, nth, pipe, prepend, prop, T, tap} = R
 
 
 ## Relative imports
@@ -25,18 +23,6 @@
 	send_ok = require './send_ok'
 
 
-## Logging
-
-	log = bunyan.createLogger
-		level: 'trace'
-		name: 'scan'
-		# stream: fs.createWriteStream('scan.log.json')
-
-	# log_error = bind(log.error, log)
-	# log_info = bind(log.info, log)
-	# log_trace = bind(log.trace, log)
-
-
 ## Make body
 
 h -> Object state -> Text
@@ -44,7 +30,7 @@ h -> Object state -> Text
 Create the HTML body section.
 This contains a search form and a list of Redis keys from the scan.
 
-	get_body = curryN 2, (h, state)->
+	get_body = curry (h, state)->
 		h 'body', [
 			h 'form', [
 				h 'input',
@@ -107,7 +93,7 @@ This contains a search form and a list of Redis keys from the scan.
 
 ## Redis SCAN command
 
-	redis_scan_from_request = (client, request)->
+	redis_scan_from_request = (log, client, request)->
 		new Promise (resolve, reject)->
 			command = get_command_from_request(request)
 
@@ -133,13 +119,17 @@ state
 Returns the entire HTML text for the Redis SCAN page.
 Suitable for sending to a client or writing to a file.
 
-	scan_html_maker = pipe(ap([get_body, make_page]), apply(pipe))
+	# scan_html_maker = pipe(ap([get_body, make_page]), apply(pipe))
+	scan_html_maker = (h)->
+		pipe(get_body(h), make_page(h))
 
 
 ## Exports
 
-	module.exports.html = curry (h, redis_client, request, response)->
-		log.trace 'Started scan.html handler.', req: request
+### HTML
+
+	module.exports.html = curry (h, log, redis_client, request, response)->
+		log.trace req: request, 'Started scan.html handler.'
 
 		fix_scan_result = applySpec
 			keys: nth 1
@@ -150,16 +140,18 @@ Suitable for sending to a client or writing to a file.
 
 		# scan_is_done = tap log_trace 'Redis SCAN done; building page.'
 
-		make_page_from_scan_result = pipe fix_scan_result, make_html, send_ok.html(response)
+		make_page_from_scan_result = pipe(fix_scan_result, make_html, send_ok.html(response))
 
-		redis_scan_from_request redis_client, request
+		redis_scan_from_request log, redis_client, request
 		.catch send_error.html_500('Redis SCAN failed.', log, request, response)
 		.then make_page_from_scan_result
 
 
-	module.exports.json = curry (redis_client, request, response)->
-		log.trace 'Started scan.json handler.', req: request
+### JSON
 
-		redis_scan_from_request redis_client, request
+	module.exports.json = curry (log, redis_client, request, response)->
+		log.trace req: request, 'Started scan.json handler.'
+
+		redis_scan_from_request log, redis_client, request
 		.catch send_error.json_500('Redis SCAN failed.', log, request, response)
 		.then send_ok.json
