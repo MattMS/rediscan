@@ -29,7 +29,9 @@
 
 	body_script = ->
 		check_for_call = (cursor, ul)->
-			if 0 != cursor and ul.lastChild.getBoundingClientRect().bottom < window.innerHeight
+			li = ul.lastChild
+
+			if 0 != cursor and li and li.getBoundingClientRect().bottom < window.innerHeight
 				call_scan_json cursor, handle_scan_json
 
 
