@@ -16,7 +16,7 @@
 
 	module.exports.html_500 = (message, log, request, response)->
 		(err)->
-			log.error message, err: err
+			log.error err: err, message
 
 			response.writeHead 500, 'Content-Type': 'text/plain'
 			response.end err
@@ -24,7 +24,7 @@
 
 	module.exports.json_500 = (message, log, request, response)->
 		(err)->
-			log.error message, err: err
+			log.error err: err, message
 
 			response.writeHead 500, 'Content-Type': 'application/json'
 			response.end JSON.stringify
