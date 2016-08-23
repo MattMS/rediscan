@@ -7,6 +7,8 @@
 
 ## Library imports
 
+	metah = require 'metah'
+
 	R = require 'ramda'
 
 	{always, ap, append, apply, applySpec, curry, equals, flatten, flip, ifElse, join, juxt, nth, pipe, prepend, prop, T, tap} = R
@@ -23,6 +25,83 @@
 	send_ok = require './send_ok'
 
 
+## Body script
+
+	body_script = ->
+		check_for_call = (cursor, ul)->
+			if 0 != cursor and ul.lastChild.getBoundingClientRect().bottom < window.innerHeight
+				call_scan_json cursor, handle_scan_json
+
+
+### Perform JSON request
+
+		call_scan_json = (cursor, callback)->
+			request = new XMLHttpRequest()
+
+			request.onreadystatechange = (event)->
+				req = event.target
+
+				if XMLHttpRequest.DONE == req.readyState
+					if 200 != req.status
+						console.error(req)
+
+					else
+						handle_scan_json JSON.parse req.responseText
+
+The `true` parameter indicates that this request is asynchronous.
+
+- https://developer.mozilla.org/en-US/docs/AJAX/Getting_Started
+
+			request.open('GET', "/scan.json?count=12&cursor=#{cursor}", true)
+			request.send()
+
+
+### Handle JSON response
+
+		handle_scan_json = (json_response)->
+			[cursor, values] = json_response
+
+			ul = document.getElementById 'search_results'
+
+			for key in values
+				li = document.createElement 'li'
+
+				a = document.createElement 'a'
+				a.setAttribute 'href', "/get/#{key}"
+				a.innerHTML = key
+
+				li.appendChild a
+				ul.appendChild li
+
+			ul.setAttribute 'data-last-cursor', cursor
+
+			check_for_call cursor, ul
+
+
+### Add event listeners
+
+		check_for_call_from_event = ->
+			ul = document.getElementById 'search_results'
+
+			cursor = ul.getAttribute 'data-last-cursor'
+
+			check_for_call cursor, ul
+
+		document.addEventListener 'DOMContentLoaded', (event)->
+			search_nav = document.getElementById 'search_nav'
+
+- https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style
+
+			search_nav.style.display = 'none'
+
+			check_for_call_from_event()
+
+- https://developer.mozilla.org/en-US/docs/Web/Events/scroll
+
+		window.addEventListener 'scroll', (event)->
+			check_for_call_from_event()
+
+
 ## Make body
 
 h -> Object state -> Text
@@ -31,6 +110,8 @@ Create the HTML body section.
 This contains a search form and a list of Redis keys from the scan.
 
 	get_body = curry (h, state)->
+		meta = metah h
+
 		h 'body', [
 			h 'form', [
 				h 'input',
@@ -56,7 +137,11 @@ This contains a search form and a list of Redis keys from the scan.
 					type: 'submit'
 			]
 
-			h 'ul#search_results', [
+NOTE: Setting attribute to `0` (non-string) will not add the attribute.
+
+			h 'ul#search_results',
+				'data-last-cursor': String(state.next_cursor) or '0'
+			, [
 				for key in state.keys
 					h 'li', [
 						h 'a', href: "/get/#{key}", key
@@ -72,6 +157,8 @@ This contains a search form and a list of Redis keys from the scan.
 							pattern: state.query.pattern
 				, 'Next'
 			]
+
+			meta.script body_script
 		]
 
 
@@ -101,8 +188,16 @@ This contains a search form and a list of Redis keys from the scan.
 
 			client.scan command, (err, result)->
 				if err
+					log.error(err: err, 'Redis SCAN failed.')
+
 					reject err
+
 				else
+					log.trace
+						redis_scan_cursor: result[0]
+						redis_scan_values: result[1]
+					, 'Redis SCAN completed.'
+
 					resolve result
 
 
@@ -154,4 +249,4 @@ Suitable for sending to a client or writing to a file.
 
 		redis_scan_from_request log, redis_client, request
 		.catch send_error.json_500('Redis SCAN failed.', log, request, response)
-		.then send_ok.json
+		.then send_ok.json(response)
