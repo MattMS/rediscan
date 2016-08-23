@@ -2,6 +2,8 @@
 
 ## Core imports
 
+	fs = require 'fs'
+
 	url = require 'url'
 
 
@@ -25,9 +27,14 @@
 	send_ok = require('./send_ok')
 
 
+## Static files
+
+	style_css = fs.readFileSync './style.css'
+
+
 ## Redis GET handler
 
-	wrap_code = pipe(flip(append)(['pre']), apply(h))
+	wrap_code = pipe(flip(append)(['pre.block']), apply(h))
 
 
 	handle_get_html = curry (log, redis_client, request, response)->
@@ -59,6 +66,8 @@
 
 ## Exports
 
+	# handle_missing_page = send_error.text_404
+
 	handle_scan_html = handle_scan.html(h)
 
 	handle_scan_json = handle_scan.json
@@ -80,6 +89,9 @@
 
 		# else if '/index.js' == pathname
 		# 	handle_ok_js request, response
+
+		else if '/style.css' == url_path
+			send_ok.css response, style_css
 
 		else if '/get/' == url_path.slice 0, 5
 			handle_get_html log, redis_client, request, response

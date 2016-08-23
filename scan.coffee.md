@@ -130,7 +130,7 @@ This contains a search form and a list of Redis keys from the scan.
 					type: 'hidden'
 					value: 0
 
-				h 'label#search_input_wrap', [
+				h 'label#search_input_wrap.text', [
 					h 'span', 'Pattern'
 
 					h 'input#search_input',

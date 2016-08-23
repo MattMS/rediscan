@@ -31,6 +31,7 @@ h -> DOM
 			meta.description package_json.description
 			meta.http_equiv()
 			meta.viewport()
+			meta.link_css '/style.css'
 		]
 
 

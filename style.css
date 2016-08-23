@@ -1,0 +1,65 @@
+body, html {
+	background-color: #222;
+	color: #eee;
+	margin: 0;
+	padding: 0;
+}
+
+body, button, input[type="text"] {
+	font-size: 16pt;
+}
+
+button, input[type="text"], label > span {
+	padding: 0.2em;
+}
+
+
+pre.block {
+	color: #eee;
+	display: block;
+	margin: 1em 0;
+	padding: 1em;
+}
+
+
+form {
+	padding: 1em;
+}
+
+label {
+	margin-right: 1em;
+}
+
+label.text > span {
+	margin-right: 1em;
+}
+
+input[type="text"] {
+	margin: 0;
+}
+
+
+ul#search_results {
+	display: block;
+	margin: 1em 0;
+	padding: 0;
+}
+
+ul#search_results > li {
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+ul#search_results > li > a {
+	color: #ddf;
+	display: block;
+	margin: 0;
+	padding: 1em;
+	text-decoration: underline;
+}
+
+ul#search_results > li > a:hover {
+	background-color: #333;
+	text-decoration: underline;
+}
