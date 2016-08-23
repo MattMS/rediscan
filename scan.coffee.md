@@ -48,11 +48,15 @@
 					else
 						handle_scan_json JSON.parse req.responseText
 
+			search_input = document.getElementById 'search_input'
+
+			pattern = search_input.value
+
 The `true` parameter indicates that this request is asynchronous.
 
 - https://developer.mozilla.org/en-US/docs/AJAX/Getting_Started
 
-			request.open('GET', "/scan.json?count=12&cursor=#{cursor}", true)
+			request.open('GET', "/scan.json?count=12&cursor=#{cursor}&pattern=#{pattern}", true)
 			request.send()
 
 
