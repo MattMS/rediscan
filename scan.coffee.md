@@ -139,6 +139,16 @@ This contains a search form and a list of Redis keys from the scan.
 						value: state.query.pattern
 				]
 
+				# h 'label.checkbox', [
+				# 	h 'input',
+				# 		checked: 'checked'
+				# 		name: 'wrap_in_stars'
+				# 		type: 'checkbox'
+				# 		value: 'true'
+				#
+				# 	h 'span', 'Wrap in *'
+				# ]
+
 				h 'button#search_button', 'Search',
 					type: 'submit'
 			]
