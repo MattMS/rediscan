@@ -48,7 +48,7 @@
 	redis_client = redis.createClient()
 
 	redis_client.on 'error', (err)->
-		log.error 'Redis client threw an error.', err: err
+		log.error err: err, 'Redis client threw an error.'
 
 
 ## Run!
