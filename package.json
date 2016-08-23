@@ -9,7 +9,7 @@
   "dependencies": {
     "bunyan": "^1.8.1",
     "hyperscript": "^1.4.7",
-    "metah": "^0.1.0",
+    "metah": "^0.2.0",
     "ramda": "^0.21.0",
     "redis": "^2.6.2",
     "rimraf": "^2.5.4"
