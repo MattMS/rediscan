@@ -25,7 +25,7 @@
     "server"
   ],
   "license": "ISC",
-  "main": "server.js",
+  "main": "main.js",
   "name": "rediscan",
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
   },
   "scripts": {
     "clean": "rimraf *.js",
-    "dev-serve": "coffee start_server.coffee.md | bunyan",
+    "dev-serve": "coffee server.coffee.md | bunyan",
     "prepublish": "coffee -c ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

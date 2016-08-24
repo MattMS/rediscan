@@ -1,103 +1,67 @@
-# Redis browser HTTP server
+# Start server
 
 ## Core imports
 
-	fs = require 'fs'
+	# fs = require 'fs'
 
-	url = require 'url'
+	http = require 'http'
 
 
 ## Library imports
 
+	bunyan = require 'bunyan'
+
 	h = require 'hyperscript'
 
-	{always, append, apply, bind, curry, drop, equals, flatten, flip, ifElse, join, juxt, pipe, prepend, prop, slice, T, tap} = require 'ramda'
+	{bind} = require 'ramda'
+
+	redis = require 'redis'
 
 
 ## Relative imports
 
-	base_page_maker = require('./base_page')(h)
-
-	get_url_from_request = require './get_url_from_request'
-
-	handle_scan = require('./scan')
-
-	send_error = require('./send_error')
-
-	send_ok = require('./send_ok')
+	request_handler_maker = require './main'
 
 
-## Static files
+## Logging
 
-	style_css = fs.readFileSync './style.css'
+	log = bunyan.createLogger
+		level: 'trace'
+		name: 'start_server'
+		serializers: bunyan.stdSerializers
+		# serializers:
+			# err: bunyan.stdSerializers.err
+			# req: bunyan.stdSerializers.req
+			# res: bunyan.stdSerializers.res
+		# serializers:
+		# 	chunk: pick(['field'])
+		# stream: fs.createWriteStream('server.log.json')
+		# stream: fs.createWriteStream('start_server.log.json')
 
-
-## Redis GET handler
-
-	wrap_code = pipe(flip(append)(['pre.block']), apply(h))
-
-
-	handle_get_html = curry (log, redis_client, request, response)->
-		log.trace req: request, 'Started /get/ handler.'
-
-		key = pipe(get_url_from_request.path, drop(5))(request)
-
-		send_result = pipe(
-			# NOTE: This fails because it receives `result` as a parameter.
-			# tap(log_trace('Redis GET done; building page.')),
-			wrap_code,
-			base_page_maker,
-			send_ok.html(response)
-		)
-
-		redis_get redis_client, key
-		.catch send_error.html_500('Redis GET failed.', log, request, response)
-		.then send_result
+	# log_error = bind(log.error, log)
+	# log_info = bind(log.info, log)
+	log_trace = bind(log.trace, log)
 
 
-	redis_get = (client, key)->
-		new Promise (resolve, reject)->
-			client.get key, (err, result)->
-				if err
-					reject err
-				else
-					resolve result
+## Redis client
+
+	redis_client = redis.createClient()
+
+	redis_client.on 'error', (err)->
+		log.error err: err, 'Redis client threw an error.'
 
 
-## Exports
+## Run!
 
-	# handle_missing_page = send_error.text_404
+	listener = request_handler_maker log, redis_client
 
-	handle_scan_html = handle_scan.html(h)
+	server = http.createServer listener
 
-	handle_scan_json = handle_scan.json
+	hostname = 'localhost'
 
-	module.exports = curry (log, redis_client, request, response)->
-		log.trace req: request, 'Received request.'
+	port = 1337
 
-		# pipe(get_url_from_request.path, cond([
-		# 	[propEq('pathname', '/'), handle_scan_html(log, redis_client)],
-		# 	[pipe(prop('pathname'), slice(0, 5), equals('/get/')), handle_get_html(log, redis_client)],
-		# 	[propEq('pathname', '/scan.json'), handle_scan_json(log, redis_client)],
-		# 	[T, handle_missing_page]
-		# ]))(request, response)
+	server.listen port, hostname, ->
+		log.info "Started server listening on #{hostname}:#{port}."
 
-		url_path = get_url_from_request.path(request)
-
-		if '/' == url_path
-			handle_scan_html log, redis_client, request, response
-
-		# else if '/index.js' == pathname
-		# 	handle_ok_js request, response
-
-		else if '/style.css' == url_path
-			send_ok.css response, style_css
-
-		else if '/get/' == url_path.slice 0, 5
-			handle_get_html log, redis_client, request, response
-
-		else if '/scan.json' == url_path
-			handle_scan_json log, redis_client, request, response
-
-		else
-			send_error.text_404 request, response
+	# redis_client.quit()
